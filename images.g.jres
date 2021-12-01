@@ -1,0 +1,17 @@
+{
+    "image1": {
+        "data": "hwQNAA0AAABFRUVFRUUFAEVFRUVFRQUARUVFRUVFBQBFRUVFRUUFAAAAUFVVBQAAVVVVRERVAABAROVeRVQAAFVVVe7uVQAAAABQVVUFAABFRUVFRUUFAEVFRUVFRQUARUVFRUVFBQBFRUVFRUUFAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "myTank"
+    },
+    "image2": {
+        "data": "hwQNAA0AAACJiYmJiYkJAImJiYmJiQkAiYmJiYmJCQCJiYmJiYkJAAAAkJmZCQAAmZmZiIiZAACAiGmWiZgAAJmZmWZmmQAAAACQmZkJAACJiYmJiYkJAImJiYmJiQkAiYmJiYmJCQCJiYmJiYkJAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "Enemy01"
+    },
+    "*": {
+        "mimeType": "image/x-mkcd-f4",
+        "dataEncoding": "base64",
+        "namespace": "myImages"
+    }
+}
