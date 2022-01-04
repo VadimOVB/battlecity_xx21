@@ -288,7 +288,7 @@ scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
     sprite.destroy(effects.fire, 100)
 })
 function showShield () {
-    if (myShield > 0) {
+    if (myShield > 0 && spriteutils.isDestroyed(shieldInfo)) {
     	
     } else {
     	
@@ -342,6 +342,7 @@ let y = 0
 let x = 0
 let projectile: Sprite = null
 let myDirectional = 0
+let shieldInfo: TextSprite = null
 let killEnemy = 0
 let killInfo: TextSprite = null
 let moneyInfo: TextSprite = null
@@ -387,12 +388,12 @@ mySpeed = 20
 numEnemy = 2
 mySpeed = 10
 let arsenalSprite = sprites.create(img`
-    . . 5 . . 
-    . 5 5 5 . 
-    5 5 5 5 5 
-    4 4 4 5 5 
-    4 4 4 5 5 
-    5 5 5 5 5 
+    . . . . . 
+    . . . . . 
+    . . . . . 
+    . . . . . 
+    . . . . . 
+    . . . . . 
     `, SpriteKind.arsenal)
 myEnemy = sprites.create(img`
     . . . . . . . . . . . . . . . . 
@@ -457,20 +458,32 @@ moneyInfo.setFlag(SpriteFlag.RelativeToCamera, true)
 moneyInfo.setPosition(80, 6)
 killInfo = textsprite.create(convertToText(killEnemy), 15, 1)
 killInfo.setIcon(img`
-    . 1 1 1 1 . . . 
-    1 . . . . 1 . . 
-    1 1 . . 1 1 . . 
-    1 . . . . 1 . . 
-    . 1 1 1 1 . . . 
-    . . . . . . . . 
-    . 1 1 1 1 . . . 
-    . 1 1 1 1 . . . 
-    . . . . . . . . 
-    . . . . . . . . 
-    . . . . . . . . 
+    . 1 1 1 1 . . . . 
+    1 . . . . 1 . . . 
+    1 1 . . 1 1 . . . 
+    1 . . . . 1 . . . 
+    . 1 1 1 1 . . . . 
+    . . . . . . . . . 
+    . 1 1 1 1 . . . . 
+    . 1 1 1 1 . . . . 
+    . . . . . . . . . 
+    . . . . . . . . . 
     `)
 killInfo.setFlag(SpriteFlag.RelativeToCamera, true)
 killInfo.setPosition(140, 6)
+shieldInfo = textsprite.create(convertToText(myShield), 15, 1)
+shieldInfo.setIcon(img`
+    . . . . . . . . 
+    . . . 5 . . . . 
+    . 5 5 5 5 5 . . 
+    . 5 5 5 5 5 . . 
+    . 5 5 5 5 5 . . 
+    . 5 5 5 5 5 . . 
+    . . 5 5 5 . . . 
+    . . . 5 . . . . 
+    . . . . . . . . 
+    . . . . . . . . 
+    `)
 game.onUpdateInterval(500, function () {
     if (mySprite.vx == 0 && mySprite.vy == 0) {
         animation.stopAnimation(animation.AnimationTypes.All, mySprite)
@@ -478,12 +491,26 @@ game.onUpdateInterval(500, function () {
     if (sprites.allOfKind(SpriteKind.arsenal).length < 20 && Math.percentChance(30)) {
         if (Math.percentChance(1)) {
             arsenalSprite = sprites.create(img`
-                1 1 2 2 1 1 
-                1 1 2 2 1 1 
-                2 2 2 2 2 2 
-                2 2 2 2 2 2 
-                1 1 2 2 1 1 
-                1 1 2 2 1 1 
+                ....................
+                ....................
+                ....................
+                ....................
+                ....................
+                ....................
+                .......22...22......
+                ......2322.2222.....
+                ......232222222.....
+                ......222222222.....
+                .......22222b2......
+                ........222b2.......
+                .........222........
+                ..........2.........
+                ....................
+                ....................
+                ....................
+                ....................
+                ....................
+                ....................
                 `, SpriteKind.Food)
         } else if (Math.percentChance(80)) {
             arsenalSprite = sprites.create(img`
@@ -491,27 +518,37 @@ game.onUpdateInterval(500, function () {
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
-                . . . . . . . b b . . . . . . . 
-                . . . . . . b 5 5 b . . . . . . 
-                . . . b b b 5 5 1 1 b b b . . . 
-                . . . b 5 5 5 5 1 1 5 5 b . . . 
-                . . . . b d 5 5 5 5 d b . . . . 
-                . . . . c b 5 5 5 5 b c . . . . 
-                . . . . c 5 d d d d 5 c . . . . 
-                . . . . c 5 d c c d 5 c . . . . 
-                . . . . c c c . . c c c . . . . 
+                . . . . . . . . . . 4 . . . . . 
+                . . . . 2 . . . . 4 4 . . . . . 
+                . . . . 2 4 . . 4 5 4 . . . . . 
+                . . . . . 2 4 d 5 5 4 . . . . . 
+                . . . . . 2 5 5 5 5 4 . . . . . 
+                . . . . . . 2 5 5 5 5 4 . . . . 
+                . . . . . . 2 5 4 2 4 4 . . . . 
+                . . . . . . 4 4 . . 2 4 4 . . . 
+                . . . . . 4 4 . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
                 `, SpriteKind.money)
         } else {
             arsenalSprite = sprites.create(img`
-                . . 5 . . 
-                . 5 5 5 . 
-                5 5 5 5 5 
-                4 4 4 5 5 
-                4 4 4 5 5 
-                5 5 5 5 5 
+                . . . . . . . 
+                . . . . . . . 
+                . . . 4 . . . 
+                . . 4 5 4 . . 
+                . . 4 5 4 . . 
+                . . d 5 d . . 
+                . 4 d 5 d 4 . 
+                . 4 5 5 5 4 . 
+                . 4 5 5 5 d . 
+                . d 5 5 5 d . 
+                . d 5 5 5 d . 
+                . d 5 5 5 d . 
+                . 4 d 5 d 4 . 
+                . . 4 4 4 . . 
+                . . . . . . . 
+                . . . . . . . 
                 `, SpriteKind.arsenal)
         }
         arsenalSprite.z = -1
