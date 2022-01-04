@@ -47,33 +47,35 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.money, function (sprite, otherSp
     otherSprite.destroy()
     music.playTone(988, music.beat(BeatFraction.Sixteenth))
     moneyInfo.setText(convertToText(myMoney))
-    if (myMoney > 10) {
-        myForse = 1
-        myShield = 0
-        mySpeed = 10
-        myPause = 2000
-    } else if (myMoney > 20) {
-        mySpeed = 15
-    } else if (myMoney > 30) {
-        myPause = 1500
-    } else if (myMoney > 30) {
-        mySpeed = 20
-    } else if (myMoney > 40) {
-        myPause = 1200
-    } else if (myMoney > 50) {
-        myShield = 1
-    } else if (myMoney > 60) {
+    if (myMoney == 10) {
+        myPause = 1800
+    } else if (myMoney == 20) {
         mySpeed = 25
-    } else if (myMoney > 60) {
-        myPause = 1000
-    } else if (myMoney > 70) {
-        myForse = 2
-    } else if (myMoney > 80) {
-        myPause = 700
-    } else if (myMoney > 90) {
+        info.changeLifeBy(1)
+    } else if (myMoney == 30) {
+        myPause = 1500
+    } else if (myMoney == 40) {
         mySpeed = 30
-    } else if (myMoney > 100) {
+        info.changeLifeBy(1)
+    } else if (myMoney == 50) {
+        myPause = 1200
+    } else if (myMoney == 60) {
         myShield = 2
+    } else if (myMoney == 70) {
+        mySpeed = 35
+    } else if (myMoney == 80) {
+        myPause = 1000
+        myShield += 1
+    } else if (myMoney == 90) {
+        myForse = 2
+    } else if (myMoney == 100) {
+        myPause = 700
+        myShield += 1
+    } else if (myMoney == 110) {
+        mySpeed = 50
+    } else if (myMoney == 120) {
+        myPause = 400
+        myShield += 1
     }
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -288,12 +290,38 @@ scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
     sprite.destroy(effects.fire, 100)
 })
 function showShield () {
-    if (myShield > 0 && spriteutils.isDestroyed(shieldInfo)) {
-    	
+    if (myShield <= 0) {
+        shieldInfo.destroy()
+    } else if (spriteutils.isDestroyed(shieldInfo)) {
+        shieldInfo = textsprite.create(convertToText(myShield), 15, 1)
+        shieldInfo.setIcon(img`
+            . . . . . . . . 
+            . . . 5 . . . . 
+            . 5 5 5 5 5 . . 
+            . 5 5 5 5 5 . . 
+            . 5 5 5 5 5 . . 
+            . 5 5 5 5 5 . . 
+            . . 5 5 5 . . . 
+            . . . 5 . . . . 
+            . . . . . . . . 
+            . . . . . . . . 
+            `)
+        shieldInfo.setFlag(SpriteFlag.RelativeToCamera, true)
+        shieldInfo.setPosition(105, 6)
     } else {
-    	
+        shieldInfo.setText(convertToText(myShield))
     }
 }
+sprites.onOverlap(SpriteKind.ProjectleEnemy, SpriteKind.Player, function (sprite, otherSprite) {
+    music.bigCrash.play()
+    sprite.destroy(effects.fire, 100)
+    if (myShield > 0) {
+        myShield += -1
+        showShield()
+    } else {
+        info.changeLifeBy(-1)
+    }
+})
 function startLevel () {
     if (level == 1) {
         tiles.setTilemap(tilemap`level0`)
@@ -484,6 +512,8 @@ shieldInfo.setIcon(img`
     . . . . . . . . 
     . . . . . . . . 
     `)
+shieldInfo.setFlag(SpriteFlag.RelativeToCamera, true)
+shieldInfo.setPosition(105, 6)
 game.onUpdateInterval(500, function () {
     if (mySprite.vx == 0 && mySprite.vy == 0) {
         animation.stopAnimation(animation.AnimationTypes.All, mySprite)
@@ -774,4 +804,5 @@ game.onUpdateInterval(500, function () {
         game.showLongText("YOU WIN", DialogLayout.Full)
         music.baDing.play()
     }
+    showShield()
 })
