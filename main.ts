@@ -287,6 +287,13 @@ scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
     }
     sprite.destroy(effects.fire, 100)
 })
+function showShield () {
+    if (myShield > 0) {
+    	
+    } else {
+    	
+    }
+}
 function startLevel () {
     if (level == 1) {
         tiles.setTilemap(tilemap`level0`)
@@ -380,12 +387,12 @@ mySpeed = 20
 numEnemy = 2
 mySpeed = 10
 let arsenalSprite = sprites.create(img`
-    . 5 . 
-    . 5 . 
-    5 5 5 
-    4 4 5 
-    4 4 5 
-    5 5 5 
+    . . 5 . . 
+    . 5 5 5 . 
+    5 5 5 5 5 
+    4 4 4 5 5 
+    4 4 4 5 5 
+    5 5 5 5 5 
     `, SpriteKind.arsenal)
 myEnemy = sprites.create(img`
     . . . . . . . . . . . . . . . . 
@@ -499,12 +506,12 @@ game.onUpdateInterval(500, function () {
                 `, SpriteKind.money)
         } else {
             arsenalSprite = sprites.create(img`
-                . 5 . 
-                . 5 . 
-                5 5 5 
-                4 4 5 
-                4 4 5 
-                5 5 5 
+                . . 5 . . 
+                . 5 5 5 . 
+                5 5 5 5 5 
+                4 4 4 5 5 
+                4 4 4 5 5 
+                5 5 5 5 5 
                 `, SpriteKind.arsenal)
         }
         arsenalSprite.z = -1
