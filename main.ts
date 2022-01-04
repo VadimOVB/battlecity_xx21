@@ -1,6 +1,8 @@
 namespace SpriteKind {
     export const info = SpriteKind.create()
     export const arsenal = SpriteKind.create()
+    export const money = SpriteKind.create()
+    export const ProjectleEnemy = SpriteKind.create()
 }
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     myDirectional = 0
@@ -40,29 +42,63 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     )
     mySprite.setVelocity(0, 0 - mySpeed)
 })
+sprites.onOverlap(SpriteKind.Player, SpriteKind.money, function (sprite, otherSprite) {
+    myMoney += 1
+    otherSprite.destroy()
+    music.playTone(988, music.beat(BeatFraction.Sixteenth))
+    moneyInfo.setText(convertToText(myMoney))
+    if (myMoney > 10) {
+        myForse = 1
+        myShield = 0
+        mySpeed = 10
+        myPause = 2000
+    } else if (myMoney > 20) {
+        mySpeed = 15
+    } else if (myMoney > 30) {
+        myPause = 1500
+    } else if (myMoney > 30) {
+        mySpeed = 20
+    } else if (myMoney > 40) {
+        myPause = 1200
+    } else if (myMoney > 50) {
+        myShield = 1
+    } else if (myMoney > 60) {
+        mySpeed = 25
+    } else if (myMoney > 60) {
+        myPause = 1000
+    } else if (myMoney > 70) {
+        myForse = 2
+    } else if (myMoney > 80) {
+        myPause = 700
+    } else if (myMoney > 90) {
+        mySpeed = 30
+    } else if (myMoney > 100) {
+        myShield = 2
+    }
+})
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    timer.throttle("action", 500, function () {
+    timer.throttle("myFire", myPause, function () {
         if (myArsenal > 0) {
             if (myDirectional == 0) {
                 projectile = sprites.createProjectileFromSprite(img`
                     5 
                     5 
                     5 
-                    `, mySprite, 0, 0 - mySpeed * 4)
+                    `, mySprite, 0, 0 - mySpeed * 5)
             } else if (myDirectional == 90) {
                 projectile = sprites.createProjectileFromSprite(img`
                     5 5 5 
-                    `, mySprite, mySpeed * 4, 0)
+                    `, mySprite, mySpeed * 5, 0)
             } else if (myDirectional == 180) {
                 projectile = sprites.createProjectileFromSprite(img`
                     5 
                     5 
                     5 
-                    `, mySprite, 0, mySpeed * 4)
+                    `, mySprite, 0, mySpeed * 5)
             } else {
                 projectile = sprites.createProjectileFromSprite(img`
                     5 5 5 
-                    `, mySprite, 0 - mySpeed * 4, 0)
+                    `, mySprite, 0 - mySpeed * 5, 0)
             }
             music.zapped.play()
             projectile.z = -1
@@ -129,9 +165,10 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     mySprite.setVelocity(0 - mySpeed, 0)
 })
 function createEnemy () {
-    myEnemy = sprites.create(enemyImages._pickRandom(), SpriteKind.Enemy)
+    myEnemy = sprites.create(assets.image`Enemy01`, SpriteKind.Enemy)
     tiles.placeOnRandomTile(myEnemy, assets.tile`transparency16`)
     sprites.setDataNumber(myEnemy, "speed", randint(5, 40))
+    sprites.setDataNumber(myEnemy, "time", -1)
     if (Math.percentChance(50)) {
         if (Math.percentChance(50)) {
             sprites.setDataNumber(myEnemy, "dir", 0)
@@ -230,26 +267,44 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.arsenal, function (sprite, other
     music.playTone(165, music.beat(BeatFraction.Sixteenth))
     arsenalInfo.setText(convertToText(myArsenal))
 })
+info.onLifeZero(function () {
+    blockSettings.clear()
+    game.over(false)
+})
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSprite) {
     info.changeLifeBy(1)
     otherSprite.destroy()
     music.playTone(494, music.beat(BeatFraction.Sixteenth))
 })
+scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
+    if (tiles.tileAtLocationEquals(location, assets.tile`Stena0`)) {
+        tiles.setTileAt(location, assets.tile`Stena1`)
+    } else if (tiles.tileAtLocationEquals(location, assets.tile`Stena1`)) {
+        tiles.setTileAt(location, assets.tile`Stena2`)
+    } else if (tiles.tileAtLocationEquals(location, assets.tile`Stena2`)) {
+        tiles.setTileAt(location, assets.tile`transparency16`)
+        tiles.setWallAt(location, false)
+    }
+    sprite.destroy(effects.fire, 100)
+})
 function startLevel () {
     if (level == 1) {
         tiles.setTilemap(tilemap`level0`)
         numEnemy = 3
+        killEnemy = 10
     } else if (level == 2) {
         tiles.setTilemap(tilemap`level4`)
         numEnemy = 10
         mySpeed = 15
+        killEnemy = 25
     } else {
+        blockSettings.writeNumber("level", 1)
+        level = 1
         game.over(true)
     }
     mySprite.setImage(assets.image`myTank`)
     tiles.placeOnRandomTile(mySprite, assets.tile`myTile0`)
     myDirectional = 0
-    myArsenal = 5
     for (let value of sprites.allOfKind(SpriteKind.arsenal)) {
         tiles.placeOnRandomTile(value, assets.tile`transparency16`)
     }
@@ -264,107 +319,71 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     music.bigCrash.play()
     otherSprite.destroy(effects.fire, 100)
     sprite.destroy(effects.fire, 100)
-    info.changeScoreBy(1)
+    killEnemy += -1
+    killInfo.setText(convertToText(killEnemy))
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     music.bigCrash.play()
     otherSprite.destroy(effects.fire, 100)
     mySprite.startEffect(effects.fire, 100)
-    info.changeScoreBy(1)
+    killEnemy += -1
     info.changeLifeBy(-1)
+    killInfo.setText(convertToText(killEnemy))
 })
+let projectile2: Sprite = null
 let y = 0
 let x = 0
 let projectile: Sprite = null
 let myDirectional = 0
+let killEnemy = 0
+let killInfo: TextSprite = null
+let moneyInfo: TextSprite = null
 let arsenalInfo: TextSprite = null
 let mySprite: Sprite = null
 let myEnemy: Sprite = null
-let level = 0
 let numEnemy = 0
 let mySpeed = 0
+let myShield = 0
+let myForse = 0
+let myPause = 0
+let level = 0
+let myMoney = 0
 let myArsenal = 0
-let enemyImages: Image[] = []
-enemyImages = [assets.image`Enemy01`, img`
-    9 9 9 . 9 8 6 . 9 9 9 
-    6 6 6 . 9 8 6 . 6 6 6 
-    9 9 9 . 9 8 6 . 9 9 9 
-    6 6 6 . 9 9 6 . 6 6 6 
-    9 9 9 9 9 8 6 6 9 9 9 
-    6 6 6 9 6 8 8 6 6 6 6 
-    9 9 9 9 6 9 8 6 9 9 9 
-    6 6 6 9 6 9 8 6 6 6 6 
-    9 9 9 9 6 6 8 6 9 9 9 
-    6 6 6 9 9 6 6 6 6 6 6 
-    9 9 9 . . . . . 9 9 9 
-    `, img`
-    6 6 6 6 . . 9 8 6 . . 6 6 6 6 
-    9 9 9 9 . . 9 8 6 . . 9 9 9 9 
-    6 6 6 6 . . 9 8 6 . . 6 6 6 6 
-    9 9 9 9 . . 9 8 6 . . 9 9 9 9 
-    6 6 6 6 . 9 9 8 9 6 . 6 6 6 6 
-    9 9 9 9 . 9 6 8 9 6 . 9 9 9 9 
-    6 6 6 6 9 9 6 8 9 9 6 6 6 6 6 
-    9 9 9 9 9 6 6 8 9 9 6 9 9 9 9 
-    6 6 6 6 9 6 8 8 8 9 6 6 6 6 6 
-    9 9 9 9 9 6 8 8 8 9 6 9 9 9 9 
-    6 6 6 6 9 6 6 6 9 9 6 6 6 6 6 
-    9 9 9 9 9 9 6 6 9 9 6 9 9 9 9 
-    6 6 6 6 . 9 9 6 6 6 . 6 6 6 6 
-    9 9 9 9 . . . . . . . 9 9 9 9 
-    6 6 6 6 . . . . . . . 6 6 6 6 
-    `]
-let enemyImages2 = [img`
-    9 8 9 8 9 8 9 8 9 8 9 8 9 
-    9 8 9 8 9 8 9 8 9 8 9 8 9 
-    9 8 9 8 9 8 9 8 9 8 9 8 9 
-    9 8 9 8 9 8 9 8 9 8 9 8 9 
-    . . . . . 9 9 9 9 9 9 . . 
-    9 9 9 9 9 9 6 6 6 6 9 9 . 
-    . 8 8 8 9 6 6 9 9 8 8 9 . 
-    9 9 9 9 9 9 8 8 8 8 9 9 . 
-    . . . . . 9 9 9 9 9 9 . . 
-    9 8 9 8 9 8 9 8 9 8 9 8 9 
-    9 8 9 8 9 8 9 8 9 8 9 8 9 
-    9 8 9 8 9 8 9 8 9 8 9 8 9 
-    9 8 9 8 9 8 9 8 9 8 9 8 9 
-    `, img`
-    9 6 9 6 9 6 9 6 9 6 9 
-    9 6 9 6 9 6 9 6 9 6 9 
-    9 6 9 6 9 6 9 6 9 6 9 
-    . . . . 6 6 6 6 6 6 . 
-    6 6 6 6 6 8 8 8 8 6 . 
-    8 8 8 9 8 8 9 9 6 6 . 
-    9 9 9 9 9 6 6 6 6 9 . 
-    . . . . 9 9 9 9 9 9 . 
-    9 6 9 6 9 6 9 6 9 6 9 
-    9 6 9 6 9 6 9 6 9 6 9 
-    9 6 9 6 9 6 9 6 9 6 9 
-    `, img`
-    6 9 6 9 6 9 6 9 6 9 6 9 6 9 6 
-    6 9 6 9 6 9 6 9 6 9 6 9 6 9 6 
-    6 9 6 9 6 9 6 9 6 9 6 9 6 9 6 
-    6 9 6 9 6 9 6 9 6 9 6 9 6 9 6 
-    . . . . . . 6 6 6 6 6 6 . . . 
-    . . . . 6 6 9 9 9 9 9 9 6 . . 
-    6 6 6 6 9 9 9 9 8 8 9 9 6 . . 
-    8 8 8 8 8 8 8 8 8 8 6 6 6 . . 
-    9 9 9 9 9 6 6 6 8 8 6 6 9 . . 
-    . . . . 9 9 9 6 6 6 6 9 9 . . 
-    . . . . . . 9 9 9 9 9 9 . . . 
-    6 9 6 9 6 9 6 9 6 9 6 9 6 9 6 
-    6 9 6 9 6 9 6 9 6 9 6 9 6 9 6 
-    6 9 6 9 6 9 6 9 6 9 6 9 6 9 6 
-    6 9 6 9 6 9 6 9 6 9 6 9 6 9 6 
-    `]
-myArsenal = 5
-mySpeed = 10
+if (blockSettings.exists("arm")) {
+    myArsenal = blockSettings.readNumber("arm")
+} else {
+    blockSettings.writeNumber("arm", 5)
+    myArsenal = 5
+}
+if (blockSettings.exists("money")) {
+    myMoney = blockSettings.readNumber("money")
+} else {
+    blockSettings.writeNumber("money", 0)
+    myMoney = 0
+}
+if (blockSettings.exists("life")) {
+    info.setLife(blockSettings.readNumber("life"))
+} else {
+    info.setLife(3)
+    blockSettings.writeNumber("life", 3)
+}
+if (blockSettings.exists("level")) {
+    level = blockSettings.readNumber("level")
+} else {
+    blockSettings.writeNumber("level", 1)
+    level = 1
+}
+myPause = 2000
+myForse = 1
+myShield = 0
+mySpeed = 20
 numEnemy = 2
 mySpeed = 10
-myArsenal = 5
-level = 1
 let arsenalSprite = sprites.create(img`
+    . 5 . 
+    . 5 . 
     5 5 5 
+    4 4 5 
     4 4 5 
     5 5 5 
     `, SpriteKind.arsenal)
@@ -386,7 +405,6 @@ myEnemy = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
     `, SpriteKind.Player)
-info.setLife(3)
 spriteutils.setLifeImage(img`
     f f . 4 . f f . 
     4 4 . 4 . 4 4 . 
@@ -398,25 +416,54 @@ spriteutils.setLifeImage(img`
     4 4 . . . 4 4 . 
     `)
 mySprite = sprites.create(assets.image`myTank`, SpriteKind.Player)
+scene.cameraFollowSprite(mySprite)
 startLevel()
 arsenalInfo = textsprite.create(convertToText(myArsenal), 15, 1)
 arsenalInfo.setIcon(img`
-    . 5 5 . . . . 
-    . 5 5 . . . . 
-    . 5 5 . . . . 
-    . 5 5 . . . . 
-    5 5 5 5 . . . 
-    5 5 5 5 . . . 
-    5 5 5 5 . . . 
-    5 5 5 5 . . . 
-    5 5 5 5 . . . 
-    5 5 5 5 . . . 
-    5 5 5 5 . . . 
-    5 5 5 5 . . . 
+    . . 5 . . . . 
+    . 5 5 5 . . . 
+    5 5 5 5 5 . . 
+    5 5 5 5 5 . . 
+    4 4 5 5 5 . . 
+    4 4 5 5 5 . . 
+    5 5 5 5 5 . . 
+    4 4 5 5 5 . . 
+    4 4 5 5 5 . . 
+    5 5 5 5 5 . . 
     `)
 arsenalInfo.setFlag(SpriteFlag.RelativeToCamera, true)
-arsenalInfo.setPosition(70, 6)
-scene.cameraFollowSprite(mySprite)
+arsenalInfo.setPosition(60, 6)
+moneyInfo = textsprite.create(convertToText(myMoney), 15, 1)
+moneyInfo.setIcon(img`
+    . . . 2 . . . . . 
+    . . 2 2 2 . . . . 
+    . 2 2 2 2 2 . . . 
+    2 2 2 2 2 2 2 . . 
+    . . 2 2 2 . . . . 
+    . . 2 2 2 . . . . 
+    . . 2 2 2 . . . . 
+    . . 2 2 2 . . . . 
+    . . . . . . . . . 
+    . . 2 2 2 . . . . 
+    `)
+moneyInfo.setFlag(SpriteFlag.RelativeToCamera, true)
+moneyInfo.setPosition(80, 6)
+killInfo = textsprite.create(convertToText(killEnemy), 15, 1)
+killInfo.setIcon(img`
+    . 1 1 1 1 . . . 
+    1 . . . . 1 . . 
+    1 1 . . 1 1 . . 
+    1 . . . . 1 . . 
+    . 1 1 1 1 . . . 
+    . . . . . . . . 
+    . 1 1 1 1 . . . 
+    . 1 1 1 1 . . . 
+    . . . . . . . . 
+    . . . . . . . . 
+    . . . . . . . . 
+    `)
+killInfo.setFlag(SpriteFlag.RelativeToCamera, true)
+killInfo.setPosition(140, 6)
 game.onUpdateInterval(500, function () {
     if (mySprite.vx == 0 && mySprite.vy == 0) {
         animation.stopAnimation(animation.AnimationTypes.All, mySprite)
@@ -431,9 +478,31 @@ game.onUpdateInterval(500, function () {
                 1 1 2 2 1 1 
                 1 1 2 2 1 1 
                 `, SpriteKind.Food)
+        } else if (Math.percentChance(80)) {
+            arsenalSprite = sprites.create(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . b b . . . . . . . 
+                . . . . . . b 5 5 b . . . . . . 
+                . . . b b b 5 5 1 1 b b b . . . 
+                . . . b 5 5 5 5 1 1 5 5 b . . . 
+                . . . . b d 5 5 5 5 d b . . . . 
+                . . . . c b 5 5 5 5 b c . . . . 
+                . . . . c 5 d d d d 5 c . . . . 
+                . . . . c 5 d c c d 5 c . . . . 
+                . . . . c c c . . c c c . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `, SpriteKind.money)
         } else {
             arsenalSprite = sprites.create(img`
+                . 5 . 
+                . 5 . 
                 5 5 5 
+                4 4 5 
                 4 4 5 
                 5 5 5 
                 `, SpriteKind.arsenal)
@@ -445,21 +514,220 @@ game.onUpdateInterval(500, function () {
         createEnemy()
     }
     for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-        if (value.vx + value.vy == 0) {
+        sprites.changeDataNumberBy(value, "time", 1)
+        if (value.vx + value.vy == 0 && sprites.readDataNumber(value, "time") <= 0) {
+            if (Math.percentChance(50)) {
+                sprites.setDataNumber(value, "dir", (sprites.readDataNumber(value, "dir") + 90) % 360)
+            } else {
+                sprites.setDataNumber(value, "dir", (sprites.readDataNumber(value, "dir") - 90) % 360)
+            }
+            sprites.setDataNumber(value, "time", -1)
+        } else if (value.vx + value.vy == 0) {
             if (Math.percentChance(90)) {
                 sprites.setDataNumber(value, "dir", (sprites.readDataNumber(value, "dir") + 180) % 360)
             } else {
                 sprites.setDataNumber(value, "dir", (sprites.readDataNumber(value, "dir") + 90) % 360)
             }
+            sprites.setDataNumber(value, "time", -1)
         } else {
             if (Math.percentChance(5)) {
                 sprites.setDataNumber(value, "dir", (sprites.readDataNumber(value, "dir") - 90) % 360)
+                sprites.setDataNumber(value, "time", -1)
             } else if (Math.percentChance(5)) {
                 sprites.setDataNumber(value, "dir", (sprites.readDataNumber(value, "dir") + 90) % 360)
+                sprites.setDataNumber(value, "time", -1)
             }
         }
         doDirectional(sprites.readDataNumber(value, "dir"))
         value.setVelocity(sprites.readDataNumber(value, "speed") * x, sprites.readDataNumber(value, "speed") * y)
-        value.sayText("" + convertToText(value.vx) + ":" + convertToText(value.vy) + ":" + sprites.readDataNumber(value, "speed"))
+        if (sprites.readDataNumber(value, "dir") == 0) {
+            animation.runImageAnimation(
+            value,
+            [img`
+                9 9 9 9 . 9 . 9 . 9 9 9 9 
+                8 8 8 8 . 9 8 9 . 8 8 8 8 
+                9 9 9 9 . 9 8 9 . 9 9 9 9 
+                8 8 8 8 . 9 8 9 . 8 8 8 8 
+                9 9 9 9 . 9 9 9 . 9 9 9 9 
+                8 8 8 8 9 9 6 9 9 8 8 8 8 
+                9 9 9 9 9 8 6 6 9 9 9 9 9 
+                8 8 8 8 9 8 9 6 9 8 8 8 8 
+                9 9 9 9 9 8 9 6 9 9 9 9 9 
+                8 8 8 8 9 8 8 6 9 8 8 8 8 
+                9 9 9 9 9 9 8 9 9 9 9 9 9 
+                8 8 8 8 . 9 9 9 . 8 8 8 8 
+                9 9 9 9 . . . . . 9 9 9 9 
+                `,img`
+                8 8 8 8 . 9 . 9 . 8 8 8 8 
+                9 9 9 9 . 9 8 9 . 9 9 9 9 
+                8 8 8 8 . 9 8 9 . 8 8 8 8 
+                9 9 9 9 . 9 8 9 . 9 9 9 9 
+                8 8 8 8 . 9 9 9 . 8 8 8 8 
+                9 9 9 9 9 9 6 9 9 9 9 9 9 
+                8 8 8 8 9 8 6 6 9 8 8 8 8 
+                9 9 9 9 9 8 9 6 9 9 9 9 9 
+                8 8 8 8 9 8 9 6 9 8 8 8 8 
+                9 9 9 9 9 8 8 6 9 9 9 9 9 
+                8 8 8 8 9 9 8 9 9 8 8 8 8 
+                9 9 9 9 . 9 9 9 . 9 9 9 9 
+                8 8 8 8 . . . . . 8 8 8 8 
+                `],
+            100,
+            true
+            )
+            if (Math.abs(mySprite.x - value.x) < 6 && mySprite.y < value.y) {
+                timer.debounce("actionE", 1500, function () {
+                    projectile2 = sprites.createProjectileFromSprite(img`
+                        2 
+                        2 
+                        . 
+                        2 
+                        . 
+                        e 
+                        `, value, 0, -30)
+                    projectile2.setKind(SpriteKind.ProjectleEnemy)
+                })
+            }
+        } else if (sprites.readDataNumber(value, "dir") == 90) {
+            animation.runImageAnimation(
+            value,
+            [img`
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                . . 9 9 9 9 9 9 . . . . . 
+                . 9 9 8 8 8 8 9 9 9 9 9 9 
+                . 9 8 8 9 9 6 6 9 8 8 8 . 
+                . 9 9 6 6 6 6 9 9 9 9 9 9 
+                . . 9 9 9 9 9 9 . . . . . 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                `,img`
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                . . 9 9 9 9 9 9 . . . . . 
+                . 9 9 8 8 8 8 9 9 9 9 9 9 
+                . 9 8 8 9 9 6 6 9 8 8 8 . 
+                . 9 9 6 6 6 6 9 9 9 9 9 9 
+                . . 9 9 9 9 9 9 . . . . . 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                `],
+            100,
+            true
+            )
+            if (Math.abs(mySprite.y - value.y) < 6 && mySprite.x > value.x) {
+                timer.debounce("action", 1500, function () {
+                    projectile2 = sprites.createProjectileFromSprite(img`
+                        e . 2 . 2 2 
+                        `, value, 30, 0)
+                    projectile2.setKind(SpriteKind.ProjectleEnemy)
+                })
+            }
+        } else if (sprites.readDataNumber(value, "dir") == 180) {
+            animation.runImageAnimation(
+            value,
+            [img`
+                9 9 9 9 . . . . . 9 9 9 9 
+                8 8 8 8 . 9 9 9 . 8 8 8 8 
+                9 9 9 9 9 9 8 9 9 9 9 9 9 
+                8 8 8 8 9 6 8 8 9 8 8 8 8 
+                9 9 9 9 9 6 9 8 9 9 9 9 9 
+                8 8 8 8 9 6 9 8 9 8 8 8 8 
+                9 9 9 9 9 6 6 8 9 9 9 9 9 
+                8 8 8 8 9 9 6 9 9 8 8 8 8 
+                9 9 9 9 . 9 9 9 . 9 9 9 9 
+                8 8 8 8 . 9 8 9 . 8 8 8 8 
+                9 9 9 9 . 9 8 9 . 9 9 9 9 
+                8 8 8 8 . 9 8 9 . 8 8 8 8 
+                9 9 9 9 . 9 . 9 . 9 9 9 9 
+                `,img`
+                8 8 8 8 . . . . . 8 8 8 8 
+                9 9 9 9 . 9 9 9 . 9 9 9 9 
+                8 8 8 8 9 9 8 9 9 8 8 8 8 
+                9 9 9 9 9 6 8 8 9 9 9 9 9 
+                8 8 8 8 9 6 9 8 9 8 8 8 8 
+                9 9 9 9 9 6 9 8 9 9 9 9 9 
+                8 8 8 8 9 6 6 8 9 8 8 8 8 
+                9 9 9 9 9 9 6 9 9 9 9 9 9 
+                8 8 8 8 . 9 9 9 . 8 8 8 8 
+                9 9 9 9 . 9 8 9 . 9 9 9 9 
+                8 8 8 8 . 9 8 9 . 8 8 8 8 
+                9 9 9 9 . 9 8 9 . 9 9 9 9 
+                8 8 8 8 . 9 . 9 . 8 8 8 8 
+                `],
+            100,
+            true
+            )
+            if (Math.abs(mySprite.x - value.x) < 6 && mySprite.y > value.y) {
+                timer.debounce("action", 1500, function () {
+                    projectile2 = sprites.createProjectileFromSprite(img`
+                        e 
+                        . 
+                        2 
+                        . 
+                        2 
+                        2 
+                        `, value, 0, 30)
+                    projectile2.setKind(SpriteKind.ProjectleEnemy)
+                })
+            }
+        } else {
+            animation.runImageAnimation(
+            value,
+            [img`
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                . . . . . 9 9 9 9 9 9 . . 
+                9 9 9 9 9 9 6 6 6 6 9 9 . 
+                . 8 8 8 9 6 6 9 9 8 8 9 . 
+                9 9 9 9 9 9 8 8 8 8 9 9 . 
+                . . . . . 9 9 9 9 9 9 . . 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                9 8 9 8 9 8 9 8 9 8 9 8 9 
+                `,img`
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                . . . . . 9 9 9 9 9 9 . . 
+                9 9 9 9 9 9 6 6 6 6 9 9 . 
+                . 8 8 8 9 6 6 9 9 8 8 9 . 
+                9 9 9 9 9 9 8 8 8 8 9 9 . 
+                . . . . . 9 9 9 9 9 9 . . 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                8 9 8 9 8 9 8 9 8 9 8 9 8 
+                `],
+            100,
+            true
+            )
+            if (Math.abs(mySprite.y - value.y) < 6 && mySprite.x < value.x) {
+                timer.debounce("action", 1500, function () {
+                    projectile2 = sprites.createProjectileFromSprite(img`
+                        2 2 . 2 . e 
+                        `, value, -30, 0)
+                    projectile2.setKind(SpriteKind.ProjectleEnemy)
+                })
+            }
+        }
+    }
+    if (killEnemy <= 0) {
+        level += 1
+        startLevel()
+        game.showLongText("YOU WIN", DialogLayout.Full)
+        music.baDing.play()
     }
 })

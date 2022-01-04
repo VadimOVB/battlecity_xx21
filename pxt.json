@@ -7,7 +7,8 @@
         "arcade-sprite-util": "github:jwunderl/arcade-sprite-util#v0.2.4",
         "Notifications": "github:unsignedarduino/notifications#de6517dcc280cafe902ef212f59d4f55a982c7ec",
         "arcade-text": "github:microsoft/arcade-text#v1.3.0",
-        "arcade-sprite-data": "github:microsoft/arcade-sprite-data#v0.1.0"
+        "arcade-sprite-data": "github:microsoft/arcade-sprite-data#v0.1.0",
+        "settings-blocks": "github:microsoft/pxt-settings-blocks#v1.0.0"
     },
     "files": [
         "main.blocks",
@@ -24,7 +25,7 @@
         "test.ts"
     ],
     "targetVersions": {
-        "target": "1.7.22",
+        "target": "1.7.24",
         "targetId": "arcade"
     },
     "supportedTargets": [

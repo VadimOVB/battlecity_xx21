@@ -9,6 +9,16 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "Enemy01"
     },
+    "image3": {
+        "data": "hwQLAAsAAABpaWlpaQkAAGlpaWlpCQAAaWlpaWkJAAAAAJmZmQAAAJmZaWaWAAAAiJiImWYAAABmZoaIaAAAAAAAZmZmAAAAaWlpaWkJAABpaWlpaQkAAGlpaWlpCQAA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "Enemy02"
+    },
+    "image4": {
+        "data": "hwQPAA8AAACWlpaWlpaWBpaWlpaWlpYGlpaWlpaWlgaWlpaWlpaWBgAAAJmZmQAAAACZaWaWCQCZmWlmiGYJAIiIiIiIZgYAZmaZmYiZBgAAAGaZmZkGAAAAAGZmZgAAlpaWlpaWlgaWlpaWlpaWBpaWlpaWlpYGlpaWlpaWlgY=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "Enemy03"
+    },
     "*": {
         "mimeType": "image/x-mkcd-f4",
         "dataEncoding": "base64",
