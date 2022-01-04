@@ -82,25 +82,79 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     timer.throttle("myFire", myPause, function () {
         if (myArsenal > 0) {
             if (myDirectional == 0) {
-                projectile = sprites.createProjectileFromSprite(img`
-                    5 
-                    5 
-                    5 
-                    `, mySprite, 0, 0 - mySpeed * 5)
+                if (myForse == 1) {
+                    projectile = sprites.createProjectileFromSprite(img`
+                        5 
+                        5 
+                        5 
+                        `, mySprite, 0, 0 - mySpeed * 5)
+                } else {
+                    projectile = sprites.createProjectileFromSprite(img`
+                        . 2 2 2 . 
+                        2 3 5 3 2 
+                        3 5 5 5 3 
+                        3 5 5 5 3 
+                        3 5 5 5 3 
+                        3 5 5 5 2 
+                        2 5 5 5 2 
+                        2 3 5 3 2 
+                        . 3 5 3 . 
+                        . 2 5 2 . 
+                        . 2 5 2 . 
+                        . 2 5 2 . 
+                        `, mySprite, 0, 0 - mySpeed * 7)
+                }
             } else if (myDirectional == 90) {
-                projectile = sprites.createProjectileFromSprite(img`
-                    5 5 5 
-                    `, mySprite, mySpeed * 5, 0)
+                if (myForse == 1) {
+                    projectile = sprites.createProjectileFromSprite(img`
+                        5 5 5 
+                        `, mySprite, mySpeed * 5, 0)
+                } else {
+                    projectile = sprites.createProjectileFromSprite(img`
+                        . . . . 2 2 3 3 3 3 2 . 
+                        2 2 2 3 3 5 5 5 5 5 3 2 
+                        5 5 5 5 5 5 5 5 5 5 5 2 
+                        2 2 2 3 3 5 5 5 5 5 3 2 
+                        . . . . 2 2 2 3 3 3 2 . 
+                        `, mySprite, mySpeed * 7, 0)
+                }
             } else if (myDirectional == 180) {
-                projectile = sprites.createProjectileFromSprite(img`
-                    5 
-                    5 
-                    5 
-                    `, mySprite, 0, mySpeed * 5)
+                if (myForse == 1) {
+                    projectile = sprites.createProjectileFromSprite(img`
+                        5 
+                        5 
+                        5 
+                        `, mySprite, 0, mySpeed * 5)
+                } else {
+                    projectile = sprites.createProjectileFromSprite(img`
+                        . 2 5 2 . 
+                        . 2 5 2 . 
+                        . 2 5 2 . 
+                        . 3 5 3 . 
+                        2 3 5 3 2 
+                        2 5 5 5 2 
+                        2 5 5 5 3 
+                        3 5 5 5 3 
+                        3 5 5 5 3 
+                        3 5 5 5 3 
+                        2 3 5 3 2 
+                        . 2 2 2 . 
+                        `, mySprite, 0, mySpeed * 7)
+                }
             } else {
-                projectile = sprites.createProjectileFromSprite(img`
-                    5 5 5 
-                    `, mySprite, 0 - mySpeed * 5, 0)
+                if (myForse == 1) {
+                    projectile = sprites.createProjectileFromSprite(img`
+                        5 5 5 
+                        `, mySprite, 0 - mySpeed * 5, 0)
+                } else {
+                    projectile = sprites.createProjectileFromSprite(img`
+                        . 2 3 3 3 2 2 2 . . . . 
+                        2 3 5 5 5 5 5 3 3 2 2 2 
+                        2 5 5 5 5 5 5 5 5 5 5 5 
+                        2 3 5 5 5 5 5 3 3 2 2 2 
+                        . 2 3 3 3 3 2 2 . . . . 
+                        `, mySprite, 0 - mySpeed * 7, 0)
+                }
             }
             music.zapped.play()
             projectile.z = -1
