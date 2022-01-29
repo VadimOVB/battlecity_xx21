@@ -706,12 +706,12 @@ game.onUpdateInterval(500, function () {
             if (Math.abs(mySprite.x - value.x) < 6 && mySprite.y < value.y) {
                 timer.debounce("actionE", 1500, function () {
                     projectile2 = sprites.createProjectileFromSprite(img`
-                        2 
-                        2 
-                        . 
-                        2 
-                        . 
-                        e 
+                        5 5 
+                        5 5 
+                        . . 
+                        5 5 
+                        . . 
+                        4 4 
                         `, value, 0, -30)
                     projectile2.setKind(SpriteKind.ProjectleEnemy)
                 })
@@ -752,9 +752,10 @@ game.onUpdateInterval(500, function () {
             true
             )
             if (Math.abs(mySprite.y - value.y) < 6 && mySprite.x > value.x) {
-                timer.debounce("action", 1500, function () {
+                timer.debounce("actionE", 1500, function () {
                     projectile2 = sprites.createProjectileFromSprite(img`
-                        e . 2 . 2 2 
+                        4 . 5 . 5 5 
+                        4 . 5 . 5 5 
                         `, value, 30, 0)
                     projectile2.setKind(SpriteKind.ProjectleEnemy)
                 })
@@ -795,14 +796,14 @@ game.onUpdateInterval(500, function () {
             true
             )
             if (Math.abs(mySprite.x - value.x) < 6 && mySprite.y > value.y) {
-                timer.debounce("action", 1500, function () {
+                timer.debounce("actionE", 1500, function () {
                     projectile2 = sprites.createProjectileFromSprite(img`
-                        e 
-                        . 
-                        2 
-                        . 
-                        2 
-                        2 
+                        4 4 
+                        . . 
+                        5 5 
+                        . . 
+                        5 5 
+                        5 5 
                         `, value, 0, 30)
                     projectile2.setKind(SpriteKind.ProjectleEnemy)
                 })
@@ -843,9 +844,10 @@ game.onUpdateInterval(500, function () {
             true
             )
             if (Math.abs(mySprite.y - value.y) < 6 && mySprite.x < value.x) {
-                timer.debounce("action", 1500, function () {
+                timer.debounce("actionE", 1500, function () {
                     projectile2 = sprites.createProjectileFromSprite(img`
-                        2 2 . 2 . e 
+                        5 5 . 5 . 4 
+                        5 5 . 5 . 4 
                         `, value, -30, 0)
                     projectile2.setKind(SpriteKind.ProjectleEnemy)
                 })
